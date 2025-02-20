@@ -2,6 +2,9 @@ import json
 import plotly
 import pandas as pd
 
+
+import nltk
+nltk.download('wordnet')
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -46,11 +49,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///data.db')
+engine = create_engine('sqlite:////Users/susiecrone/Documents/Project_2_Data_Science/data/data.db')
 df = pd.read_sql_table('data', engine)
 
 # load model
-model = joblib.load("trained_model.pkl")
+model = joblib.load("/Users/susiecrone/Documents/Project_2_Data_Science/models/trained_model.pkl")
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
