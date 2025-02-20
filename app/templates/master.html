@@ -65,12 +65,14 @@
 </div>
 
 <script type="text/javascript">
-    const graphs = {{graphJSON | safe}};
-    const ids = {{ids | safe}};
-    for(let i in graphs) {
-        Plotly.plot(ids[i], graphs[i].data, graphs[i].layout);
+    const graphs = {{ graphJSON | safe }};
+    const ids = {{ ids | safe }};
+
+    for (let i = 0; i < ids.length; i++) {
+        Plotly.newPlot(ids[i], graphs.data, graphs.layout);
     }
 </script>
+
 
 </body>
 </html>
