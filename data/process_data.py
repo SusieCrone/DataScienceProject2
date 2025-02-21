@@ -4,11 +4,31 @@ import string as s
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Loads messages and categories datasets from CSV files.
+
+    Args:
+        messages_filepath (str): File path for messages.csv file.
+        categories_filepath (str): File path for categories.csv file.
+
+    Returns:
+        x2 pd.DataFrame: Messages and categories dataframes.
+    """
     messages = pd.DataFrame(pd.read_csv(messages_filepath))
     categories = pd.DataFrame(pd.read_csv(categories_filepath))
     return messages, categories
 
 def clean_data(df, categories):
+    """
+    Cleans and processes the data.
+
+    Args:
+        df (pd.DataFrame): Messages dataframe.
+        categories (pd.DataFrame): Categories dataframe.
+
+    Returns:
+        pd.DataFrame: Cleaned and merged dataframe.
+    """
     # merge datasets
     df = df.merge(categories, how='outer', on=['id'])
 
@@ -43,10 +63,23 @@ def clean_data(df, categories):
     return df
 
 def save_data(df, database_filename):
+    """
+    Save the cleaned dataset as a SQLite database.
+
+    Args:
+        df (pd.DataFrame): Cleaned dataframe.
+        database_filename (str): File path for the database file.
+    """
     engine = create_engine(f'sqlite:///{database_filename}', echo=False)
     df.to_sql(name='data', con=engine, index=False, if_exists='replace')
 
 def main():
+    """
+    Execute the ETL pipeline:
+    - Load data
+    - Clean data
+    - Save data to a SQLite database
+    """
     if len(sys.argv) == 4:
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
 
