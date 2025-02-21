@@ -61,7 +61,7 @@ df = pd.read_sql_table('data', engine)
 # load model
 model = joblib.load("/Users/susiecrone/Documents/Project_2_Data_Science/models/trained_model.pkl")
 
-# index webpage displays cool visuals and receives user input text for model
+# index webpage displays visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
@@ -95,14 +95,14 @@ def index():
             }
         ],
         'layout': {
-            'title': 'Percentage Distribution of Message Genres'
+            'title': 'Distribution of Message Genres as a Percentage'
         }
     }
     
-    # Combine both graphs into one list
+    # Combine graphs
     graphs = [bar_chart, pie_chart]
     
-    # Create an ID for each graph for rendering in the template
+    # Create an ID for each graph
     ids = ["graph-{}".format(i) for i in range(len(graphs))]
     
     # Convert the graphs list into JSON for Plotly
