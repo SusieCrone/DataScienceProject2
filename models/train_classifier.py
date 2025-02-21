@@ -23,6 +23,15 @@ from sqlalchemy import create_engine
 url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 def load_data(database_filepath):
+    """
+    Load data from SQLite database.
+    
+    Args:
+        database_filepath (str): Path to SQLite database file.
+    
+    Returns:
+        tuple: Features (X) and target variables (y).
+    """
     engine = create_engine('sqlite:////Users/susiecrone/Documents/Project_2_Data_Science/data/data.db')
     df = pd.read_sql("SELECT * FROM data", engine)
     X = df.message.values
@@ -30,7 +39,19 @@ def load_data(database_filepath):
     return X, y
 
 class StartingVerbExtractor(BaseEstimator, TransformerMixin):
+    """
+    Flag if the first word in a sentence is a verb.
+    """
     def starting_verb(self, text):
+        """
+        Check if the first word in a sentence is a verb.
+        
+        Args:
+            text (str): Input text.
+        
+        Returns:
+            bool: True if the first word is a verb, else False.
+        """
         sentence_list = nltk.sent_tokenize(text)
         for sentence in sentence_list:
             pos_tags = nltk.pos_tag(tokenize(sentence))
@@ -40,13 +61,34 @@ class StartingVerbExtractor(BaseEstimator, TransformerMixin):
         return False
 
     def fit(self, x, y=None):
+        """
+        Fit method for scikit-learn model.
+        """
         return self
 
     def transform(self, X):
+        """
+        Extract starting verbs.
+        
+        Args:
+            X (pd.Series): Series of text data.
+        
+        Returns:
+            pd.DataFrame: Dataframe containing boolean values flagging starting verbs.
+        """
         X_tagged = pd.Series(X).apply(self.starting_verb)
         return pd.DataFrame(X_tagged)
 
 def tokenize(text):
+    """
+    Tokenize input text and replace URLs with placeholders.
+    
+    Args:
+        text (str): Input text.
+    
+    Returns:
+        list: List of cleaned tokens.
+    """
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
         text = text.replace(url, "urlplaceholder")
@@ -62,6 +104,12 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
+    """
+    Build machine learning pipeline using GridSearchCV.
+    
+    Returns:
+        GridSearchCV: Grid search model pipeline.
+    """
     pipeline = Pipeline([
         ('features', FeatureUnion([
             ('text_pipeline', Pipeline([
@@ -81,6 +129,15 @@ def build_model():
     return cv
 
 def evaluate_model(model, x_test, y_test, category_names):
+    """
+    Evaluate the model's performance, printing classification report.
+    
+    Args:
+        model: Trained machine learning model.
+        x_test (array-like): Test features.
+        y_test (array-like): True labels.
+        category_names (list): Category names.
+    """
     y_pred = model.predict(x_test)  # Ensure y_pred is defined before using it
     y_test_bin = (y_test > 0).astype(int)
     y_pred_bin = (y_pred > 0).astype(int)
@@ -90,10 +147,25 @@ def evaluate_model(model, x_test, y_test, category_names):
     print(report)
 
 def save_model(model, model_filepath):
+    """
+    Save trained model to pickle file.
+    
+    Args:
+        model: Trained machine learning model.
+        model_filepath (str): Path to save pickle file.
+    """
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
 
 def main():
+    """
+    Execute training pipeline with function.
+    - Load data
+    - Build model
+    - Train model
+    - Evaluate model
+    - Save model
+    """
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
