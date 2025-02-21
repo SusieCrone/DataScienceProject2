@@ -24,8 +24,19 @@ from sqlalchemy import create_engine
 from sklearn.base import BaseEstimator, TransformerMixin
 
 class StartingVerbExtractor(BaseEstimator, TransformerMixin):
-
+    """
+    Determining whether the first word in a sentence is a verb.
+    """
     def starting_verb(self, text):
+        """
+        Check if the first word in a sentence is a verb.
+        
+        Args:
+            text (str): Input text.
+        
+        Returns:
+            bool: True if the first word is a verb, else False.
+        """
         sentence_list = nltk.sent_tokenize(text)
         for sentence in sentence_list:
             pos_tags = nltk.pos_tag(tokenize(sentence))
@@ -35,15 +46,36 @@ class StartingVerbExtractor(BaseEstimator, TransformerMixin):
         return False
 
     def fit(self, x, y=None):
+        """
+        Fit method for scikit-learn model.
+        """
         return self
 
     def transform(self, X):
+        """
+        Apply to extract starting verbs.
+        
+        Args:
+            X (pd.Series): Series of str data.
+        
+        Returns:
+            pd.DataFrame: Dataframe containing boolean values flagging starting verbs.
+        """
         X_tagged = pd.Series(X).apply(self.starting_verb)
         return pd.DataFrame(X_tagged)
 
 app = Flask(__name__)
 
 def tokenize(text):
+    """
+    Tokenize and lemmatize input text.
+    
+    Args:
+        text (str): Input text.
+    
+    Returns:
+        list: List of cleaned tokens.
+    """
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -65,6 +97,12 @@ model = joblib.load("/Users/susiecrone/Documents/Project_2_Data_Science/models/t
 @app.route('/')
 @app.route('/index')
 def index():
+    """
+    Render the visualizations in index page.
+    
+    Returns:
+        str: Rendered HTML template.
+    """
     # Extract data needed for visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
@@ -114,6 +152,12 @@ def index():
 # web page that handles user query and displays model results
 @app.route('/go')
 def go():
+    """
+    Render the model predictions based on user input.
+    
+    Returns:
+        str: Rendered HTML template.
+    """
     # save user input in query
     query = request.args.get('query', '') 
 
@@ -130,6 +174,9 @@ def go():
 
 
 def main():
+    """
+    Run the Flask app.
+    """
     app.run(host='0.0.0.0', port=3000, debug=True)
 
 
