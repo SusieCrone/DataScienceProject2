@@ -23,7 +23,7 @@ from sqlalchemy import create_engine
 url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:///data.db')
+    engine = create_engine('sqlite:////Users/susiecrone/Documents/Project_2_Data_Science/data/data.db')
     df = pd.read_sql("SELECT * FROM data", engine)
     X = df.message.values
     y = df.loc[:, 'related':'direct_report'].values
