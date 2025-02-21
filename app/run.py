@@ -2,12 +2,18 @@ import json
 import plotly
 import pandas as pd
 
-
 import nltk
-nltk.download('wordnet')
+nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
+
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+
+from nltk.corpus import wordnet as wn
+
+synsets = wn.synsets("dog")
+print(synsets)
+
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -59,42 +65,51 @@ model = joblib.load("/Users/susiecrone/Documents/Project_2_Data_Science/models/t
 @app.route('/')
 @app.route('/index')
 def index():
-    
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # Extract data needed for visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
+    # First graph: Bar Chart
+    bar_chart = {
+        'data': [
+            {
+                'x': genre_names,
+                'y': genre_counts.tolist(),
+                'type': 'bar'
             }
+        ],
+        'layout': {
+            'title': 'Distribution of Message Genres',
+            'yaxis': {'title': "Count"},
+            'xaxis': {'title': "Genre"}
         }
-    ]
+    }
     
-    # encode plotly graphs in JSON
-    ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
+    # Second graph: Pie Chart
+    pie_chart = {
+        'data': [
+            {
+                'values': genre_counts.tolist(),
+                'labels': genre_names,
+                'type': 'pie'
+            }
+        ],
+        'layout': {
+            'title': 'Percentage Distribution of Message Genres'
+        }
+    }
+    
+    # Combine both graphs into one list
+    graphs = [bar_chart, pie_chart]
+    
+    # Create an ID for each graph for rendering in the template
+    ids = ["graph-{}".format(i) for i in range(len(graphs))]
+    
+    # Convert the graphs list into JSON for Plotly
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
     
-    # render web page with plotly graphs
+    # Render the master template with graphs and ids
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
-
 
 # web page that handles user query and displays model results
 @app.route('/go')
